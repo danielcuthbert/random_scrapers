@@ -84,16 +84,18 @@ def getPayload(spn):
 
 
 # Responses from the target server
-resp_default = "<msg>Unable to find the configuration - Master Key is in use</msg>"
+resp_default = "<msg>Unable to find the configuration</msg>"
 resp_params = "<msg>Invalid parameters</msg>"
 resp_invalid = "<msg>Invalid Cookie</msg>"
 resp_good = "<msg>Unable to generate client certificate</msg>"
+resp_denied = "<msg>Access Denied</msg>"
 
 resps = {
     resp_default: "[Vulnerable] Default MasterKey is in use.",
     resp_params: "[Error]Invalid parameters, bug?",
     resp_invalid: "[Not Vulnerable] Default MasterKey is in not in use.",
     resp_good: "[Vulnerable] Default MasterKey, SCEP enabled and correct scep-profile-name",
+    resp_denied: "[Wrong Target] This is not the target you are looking for.",
 }
 
 
@@ -136,5 +138,7 @@ if __name__ == "__main__":
         headers={"content-type": "application/x-www-form-urlencoded"},
         verify=False,
     )
-    print((r.text))
+   # Handle the response from the server
+    print("[*] Raw response from the server: {}".format(r.text))
+
     print((classify(r.text)))
