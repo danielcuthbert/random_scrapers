@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # HTTP2 Scanner - Check domains for HTTP/2 support via ALPN.
 # Author: Daniel Cuthbert
-# Version: 0.2.1
+# Version: 0.3.1
 
 import subprocess
 import argparse
@@ -22,7 +22,7 @@ def check_alpn_support(domain, port=443, debug=False, verbosity=0, timeout=10):
         "openssl",
         "s_client",
         "-alpn",
-        "h2",
+        "h2, h3",
         "-connect",
         f"{domain}:{port}",
         "-status",
@@ -44,9 +44,11 @@ def check_alpn_support(domain, port=443, debug=False, verbosity=0, timeout=10):
         if b"ALPN protocol: h2" in output:
             return f"{domain} supports HTTP/2 via Application-Layer Protocol Negotiation (ALPN)!"
         elif b"ALPN protocol: " in output:
-            return f"{domain} does NOT support HTTP/2 via Application-Layer Protocol Negotiation (ALPN)."
+            return f"{domain} does NOT support HTTP/2 or HTTP/3 via ALPN."
+        elif b"ALPN protocol: h3" in output:
+            return f"{domain} supports HTTP/3 via ALPN!"
         else:
-            return f"{domain} does NOT support HTTP/2 via Application-Layer Protocol Negotiation (ALPN) or there was an error."
+            return f"{domain} does NOT support HTTP/2 or HTTP/3 via ALPN or there was an error."
 
     except subprocess.TimeoutExpired:
         return f"Timeout expired while checking {domain}. The command took longer than {timeout} seconds."
@@ -60,7 +62,7 @@ def check_alpn_support(domain, port=443, debug=False, verbosity=0, timeout=10):
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="Check domains for HTTP/2 support via ALPN."
+        description="Check domains for HTTP/2 & HTTP/3 support via Application-Layer Protocol Negotiation (ALPN)"
     )
     parser.add_argument("--file", required=True, help="Path to the file with domains.")
     parser.add_argument(
@@ -84,7 +86,7 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
-    print("Checking domains for HTTP/2 support via ALPN...")
+    print("Checking domains for HTTP/2 & HTTP/3 support via ALPN...")
 
     domains = read_domains_from_file(args.file)
 
