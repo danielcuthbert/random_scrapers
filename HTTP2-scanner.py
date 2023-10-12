@@ -2,13 +2,26 @@
 # -*- coding: utf-8 -*-
 # HTTP2 Scanner - Check domains for HTTP/2 support via ALPN.
 # Author: Daniel Cuthbert
-# Version: 0.3.1
+# Version: 0.3.3
 
 import subprocess
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+import csv
 
 MAX_THREADS = 20  # adjust this to your liking and performance of your machine
+
+
+def banner():
+    print(
+        """
+          ╦ ╦╔╦╗╔╦╗╔═╗  ╔═╗┌─┐┌─┐┌┐┌┌┐┌┌─┐┬─┐
+          ╠═╣ ║  ║ ╠═╝  ╚═╗│  ├─┤││││││├┤ ├┬┘
+          ╩ ╩ ╩  ╩ ╩    ╚═╝└─┘┴ ┴┘└┘┘└┘└─┘┴└─
+          Version 0.3.3
+          @danielcuthbert
+          """
+    )
 
 
 def read_domains_from_file(file_path):
@@ -81,10 +94,16 @@ def get_args():
         default=10,
         help="Maximum time (in seconds) allowed for the openssl command to run. Default is 10 seconds.",
     )
+    parser.add_argument(
+        "--output",
+        default="results.csv",
+        help="Path to the output file. Default is 'results.csv in the same directory this script is run from'.",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
+    banner()
     args = get_args()
     print("Checking domains for HTTP/2 & HTTP/3 support via ALPN...")
 
@@ -92,12 +111,20 @@ if __name__ == "__main__":
 
     def check_domain(domain):
         print(f"Checking {domain}...")
-        return check_alpn_support(
+        return domain, check_alpn_support(
             domain, debug=args.debug, verbosity=args.verbose, timeout=args.timeout
         )
 
     with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
         results = list(executor.map(check_domain, domains))
 
-    for result in results:
+    with open(args.output, "w", newline="") as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(["Domain", "Result"])  # Writing headers
+        for domain, result in results:
+            csv_writer.writerow([domain, result])
+    print(f"Results saved to {args.output}")
+
+    # Print results to the console
+    for domain, result in results:
         print(result)
