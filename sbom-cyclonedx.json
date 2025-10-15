@@ -1,0 +1,91 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:11111111-2222-3333-4444-555555555555",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-10-15T12:00:00Z",
+    "tools": [
+      { "vendor": "Workshop", "name": "Hidden Dependencies Generator", "version": "1.0" }
+    ],
+    "component": {
+      "type": "application",
+      "name": "module3-training-stack",
+      "version": "0.0.1",
+      "bomRef": "app:module3-training-stack"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "requests",
+      "version": "2.25.1",
+      "purl": "pkg:pypi/requests@2.25.1",
+      "bomRef": "pkg:pypi/requests@2.25.1",
+      "licenses": [{ "license": { "id": "Apache-2.0" } }],
+      "externalReferences": [
+        { "type": "website", "url": "https://pypi.org/project/requests/2.25.1/" }
+      ],
+      "supplier": { "name": "Python Software ecosystem" }
+    },
+    {
+      "type": "library",
+      "name": "urllib3",
+      "version": "1.25.3",
+      "purl": "pkg:pypi/urllib3@1.25.3",
+      "bomRef": "pkg:pypi/urllib3@1.25.3",
+      "licenses": [{ "license": { "id": "MIT" } }],
+      "externalReferences": [
+        { "type": "website", "url": "https://pypi.org/project/urllib3/1.25.3/" }
+      ],
+      "supplier": { "name": "Python Software ecosystem" }
+    },
+    {
+      "type": "library",
+      "name": "PyYAML",
+      "version": "5.1",
+      "purl": "pkg:pypi/PyYAML@5.1",
+      "bomRef": "pkg:pypi/PyYAML@5.1",
+      "licenses": [{ "license": { "id": "MIT" } }],
+      "externalReferences": [
+        { "type": "website", "url": "https://pypi.org/project/PyYAML/5.1/" }
+      ],
+      "supplier": { "name": "Python Software ecosystem" }
+    },
+    {
+      "type": "library",
+      "name": "Jinja2",
+      "version": "2.10",
+      "purl": "pkg:pypi/Jinja2@2.10",
+      "bomRef": "pkg:pypi/Jinja2@2.10",
+      "licenses": [{ "license": { "id": "BSD-3-Clause" } }],
+      "externalReferences": [
+        { "type": "website", "url": "https://pypi.org/project/Jinja2/2.10/" }
+      ],
+      "supplier": { "name": "Python Software ecosystem" }
+    },
+    {
+      "type": "library",
+      "name": "Pillow",
+      "version": "6.2.0",
+      "purl": "pkg:pypi/Pillow@6.2.0",
+      "bomRef": "pkg:pypi/Pillow@6.2.0",
+      "licenses": [{ "license": { "id": "HPND" } }],
+      "externalReferences": [
+        { "type": "website", "url": "https://pypi.org/project/Pillow/6.2.0/" }
+      ],
+      "supplier": { "name": "Python Software ecosystem" }
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:pypi/requests@2.25.1",
+      "dependsOn": [
+        "pkg:pypi/urllib3@1.25.3"
+      ]
+    }
+  ],
+  "properties": [
+    { "name": "training.note", "value": "Outdated pins chosen for classroom analysis of severity, exploitability, posture, reachability and blast radius." }
+  ]
+}
